@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
 import { Trading212Provider } from './providers/Trading212Provider.js';
@@ -6,7 +7,17 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const isDevelopment = process.env.NODE_ENV === 'development';
+const nodeEnv = process.env.NODE_ENV || 'development';
+const isDevelopment = nodeEnv === 'development';
+const isTesting = nodeEnv === 'test';
+const isProduction = nodeEnv === 'production';
+// Logging verbosity
+const logLevel = isProduction ? 'error' : 'debug';
+// Error details
+const showStackTrace = isDevelopment;
+// Performance optimizations
+const enableCaching = isProduction;
+
 
 // Injection: In production, we use real credentials
 const t212StocksISA = new Trading212Provider(
@@ -22,30 +33,48 @@ app.get('/balance', async (req, res) => {
     res.json({ source: 'Trading212 Stocks ISA', ...balance });
   } catch (error) {
     // In development, show detailed errors
-    const errorMessage = isDevelopment && error instanceof Error 
+    const errorMessage = logLevel === 'debug' && error instanceof Error 
       ? error.message 
       : 'Failed to fetch balance';
     res.status(500).json({ error: errorMessage });
   }
 });
 
-const server = app.listen(port, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode at http://localhost:${port}`);
-});
-
-// --- Graceful Shutdown Logic ---
-const shutdown = () => {
-  console.log('SIGTERM received. Shutting down gracefully...');
-  server.close(() => {
-    console.log('Process terminated.');
-    process.exit(0);
+// Only start server if not in test environment and not being imported
+if (!isTesting && process.argv[1] === fileURLToPath(import.meta.url)) {
+  const server = app.listen(port, () => {
+    console.log(`Server running in ${nodeEnv} mode at http://localhost:${port}`);
   });
 
-  // Force shutdown after 10s if connections aren't closing
-  setTimeout(() => process.exit(1), 10000);
-};
+  if (isProduction) {
+    // In production, handle shutdown signals to close server gracefully
+    const shutdown = (signal: string) => {
+      console.log(`${signal} received. Shutting down gracefully...`);
+      server.close(() => {
+        console.log('Process terminated.');
+        process.exit(0);
+      });
 
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
+      // Force shutdown after 10s if connections aren't closing
+      setTimeout(() => {
+        console.error('Forcing shutdown after timeout');
+        process.exit(1);
+      }, 10000);
+    };
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+  } else {
+    // In development, allow `tsx watch` to handle restarts
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received. Closing server...');
+      server.close();
+    });
+    process.on('SIGINT', () => {
+      console.log('SIGINT received. Closing server...');
+      server.close();
+    });
+  }
+}
 
 export { app }; // Export for Integration Tests

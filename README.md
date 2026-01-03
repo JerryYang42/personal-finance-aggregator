@@ -8,6 +8,31 @@ How to find the access key?
 https://helpcentre.trading212.com/hc/en-us/articles/14584770928157-Trading-212-API-key
 
 
+## Usage
+
+Use:
+
+```zsh
+# Development (tsx watch with hot reload)
+npm run dev
+# Production (compiled, optimized)
+npm run build && npm start
+# Quick testing without build (keep as backup)
+npm run start:ts 
+```
+
+## Dependencies
+
+What you're using:
+
+✅ tsx - For development (npm run dev)
+✅ tsc - For building (npm run build)
+✅ node - For production (npm start)
+✅ ts-jest - For testing (handles TypeScript in Jest)
+
+What's NOT being used:
+
+❌ ts-node
 
 ## Project Structure
 
@@ -43,6 +68,9 @@ npm i --save-dev @types/node
 
 # install unit test lib
 npm install --save-dev jest @types/jest ts-jest
+
+# install tsx
+npm install --save-dev tsx
 ```
 
 ```zsh
