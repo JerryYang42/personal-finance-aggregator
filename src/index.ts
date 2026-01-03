@@ -9,14 +9,14 @@ const port = process.env.PORT || 3000;
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Injection: In production, we use real credentials
-const t212 = new Trading212Provider(
-  process.env.TRADING212_API_KEY || '',
-  process.env.TRADING212_SECRET_KEY || ''
+const t212StocksISA = new Trading212Provider(
+  process.env.TRADING212_STOCKS_ISA_API_KEY || '',
+  process.env.TRADING212_STOCKS_ISA_SECRET_KEY || ''
 );
 
 app.get('/balance', async (req, res) => {
   try {
-    const balance = await t212.getBalance();
+    const balance = await t212StocksISA.getBalance();
     res.json({ source: 'Trading212 Stocks ISA', ...balance });
   } catch (error) {
     // In development, show detailed errors
