@@ -1,5 +1,7 @@
 # personal-finance-aggregator
 
+[![CI](https://github.com/JerryYang42/personal-finance-aggregator/actions/workflows/ci.yml/badge.svg)](https://github.com/JerryYang42/personal-finance-aggregator/actions/workflows/ci.yml)
+
 ## Support
 
 ### 1. Trading212
