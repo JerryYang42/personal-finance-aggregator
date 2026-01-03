@@ -5,14 +5,19 @@ export interface IBankProvider {
   getBalance(): Promise<{ balance: number; currency: string }>;
 }
 
+export interface HttpBasicAuthCredentials {
+  apiKey: string;
+  apiSecret: string;
+}
+
 export class Trading212Provider implements IBankProvider {
   private readonly baseUrl = 'https://live.trading212.com/api/v0/equity/account/cash';
   
-  constructor(private apiKey: string, private apiSecret: string) {}
+  constructor(private credentials: HttpBasicAuthCredentials) {}
 
   async getBalance() {
     // Trading 212 uses Basic Auth: base64(key:secret)
-    const auth = Buffer.from(`${this.apiKey}:${this.apiSecret}`).toString('base64');
+    const auth = Buffer.from(`${this.credentials.apiKey}:${this.credentials.apiSecret}`).toString('base64');
     
     const response = await axios.get(this.baseUrl, {
       headers: { Authorization: `Basic ${auth}` }

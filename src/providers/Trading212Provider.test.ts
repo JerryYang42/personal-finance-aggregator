@@ -7,7 +7,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('Trading212Provider', () => {
   it('should fetch balance with correct headers', async () => {
-    const provider = new Trading212Provider('key', 'secret');
+    const provider = new Trading212Provider({ apiKey: 'key', apiSecret: 'secret' });
     mockedAxios.get.mockResolvedValue({ data: { total: 100, currency: Currency.GBP } });
 
     const result = await provider.getBalance();

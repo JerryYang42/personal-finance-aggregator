@@ -10,8 +10,10 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Injection: In production, we use real credentials
 const t212StocksISA = new Trading212Provider(
-  process.env.TRADING212_STOCKS_ISA_API_KEY || '',
-  process.env.TRADING212_STOCKS_ISA_SECRET_KEY || ''
+  { 
+    apiKey: process.env.TRADING212_STOCKS_ISA_API_KEY || '', 
+    apiSecret: process.env.TRADING212_STOCKS_ISA_SECRET_KEY || '' 
+  }
 );
 
 app.get('/balance', async (req, res) => {
