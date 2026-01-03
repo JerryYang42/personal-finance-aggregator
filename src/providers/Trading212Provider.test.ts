@@ -1,4 +1,4 @@
-import { Trading212Provider } from './Trading212Provider.js';
+import { Trading212Provider } from './Trading212Provider';
 import axios from 'axios';
 
 jest.mock('axios');

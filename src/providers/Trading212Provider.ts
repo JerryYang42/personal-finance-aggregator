@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export interface IBankProvider {
-  getBalance(): Promise<{ cash: number; currency: string }>;
+  getBalance(): Promise<{ balance: number; currency: string }>;
 }
 
 export class Trading212Provider implements IBankProvider {
@@ -18,8 +18,8 @@ export class Trading212Provider implements IBankProvider {
     });
 
     return {
-      cash: response.data.total,
-      currency: response.data.currency
+      balance: response.data.total,
+      currency: "GBP"
     };
   }
 }

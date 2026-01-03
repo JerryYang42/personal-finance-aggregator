@@ -6,6 +6,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Injection: In production, we use real credentials
 const t212 = new Trading212Provider(
@@ -16,14 +17,18 @@ const t212 = new Trading212Provider(
 app.get('/balance', async (req, res) => {
   try {
     const balance = await t212.getBalance();
-    res.json({ source: 'Trading 212', ...balance });
+    res.json({ source: 'Trading212 Stocks ISA', ...balance });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch balance' });
+    // In development, show detailed errors
+    const errorMessage = isDevelopment && error instanceof Error 
+      ? error.message 
+      : 'Failed to fetch balance';
+    res.status(500).json({ error: errorMessage });
   }
 });
 
 const server = app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode at http://localhost:${port}`);
 });
 
 // --- Graceful Shutdown Logic ---
