@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Currency } from '../models/Currency.js';
 
 export interface IBankProvider {
   getBalance(): Promise<{ balance: number; currency: string }>;
@@ -19,7 +20,7 @@ export class Trading212Provider implements IBankProvider {
 
     return {
       balance: response.data.total,
-      currency: "GBP"
+      currency: Currency.GBP
     };
   }
 }
