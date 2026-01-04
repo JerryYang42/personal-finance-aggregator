@@ -2,6 +2,7 @@ import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
 import { Trading212Provider } from './providers/Trading212Provider.js';
+import { AccountService } from './services/AccountService.js';
 import { validateEnv } from './config/validateEnv.js';
 
 dotenv.config();
@@ -19,27 +20,59 @@ const isProduction = nodeEnv === 'production';
 // Logging verbosity
 const logLevel = isProduction ? 'error' : 'debug';
 
-// Injection: In production, we use real credentials
-const t212StocksISA = new Trading212Provider(
-  { 
-    apiKey: process.env.TRADING212_STOCKS_ISA_API_KEY || '', 
-    apiSecret: process.env.TRADING212_STOCKS_ISA_SECRET_KEY || '' 
-  }
+// Initialize account service
+const accountService = new AccountService();
+
+// Register providers
+accountService.registerProvider(
+  'trading212-stocks-isa',
+  new Trading212Provider(
+    { 
+      apiKey: process.env.TRADING212_STOCKS_ISA_API_KEY || '', 
+      apiSecret: process.env.TRADING212_STOCKS_ISA_SECRET_KEY || '' 
+    },
+    'Trading212 Stocks ISA'
+  ),
+  'investment'
 );
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-app.get('/balance', async (req, res) => {
+app.get('/accounts', (req, res) => {
   try {
-    const balance = await t212StocksISA.getBalance();
-    res.json({ source: 'Trading212 Stocks ISA', ...balance });
+    const accounts = accountService.listAccounts();
+    res.json({ accounts });
   } catch (error) {
-    // In development, show detailed errors
+    const errorMessage = logLevel === 'debug' && error instanceof Error 
+      ? error.message 
+      : 'Failed to list accounts';
+    res.status(500).json({ error: errorMessage });
+  }
+});
+
+app.get('/accounts/:accountId/balance', async (req, res) => {
+  try {
+    const balance = await accountService.getBalance(req.params.accountId);
+    res.json(balance);
+  } catch (error) {
     const errorMessage = logLevel === 'debug' && error instanceof Error 
       ? error.message 
       : 'Failed to fetch balance';
+    const statusCode = error instanceof Error && error.message.includes('not found') ? 404 : 500;
+    res.status(statusCode).json({ error: errorMessage });
+  }
+});
+
+app.get('/balances', async (req, res) => {
+  try {
+    const balances = await accountService.getAllBalances();
+    res.json({ balances });
+  } catch (error) {
+    const errorMessage = logLevel === 'debug' && error instanceof Error 
+      ? error.message 
+      : 'Failed to fetch balances';
     res.status(500).json({ error: errorMessage });
   }
 });
