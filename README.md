@@ -76,6 +76,9 @@ npm install --save-dev tsx
 
 # install eslint
 npm install --save-dev @eslint/js typescript-eslint
+
+# install nock, HTTP-level interceptor mock, for integration test purpose
+npm install --save-dev nock @types/nock
 ```
 
 ```zsh
