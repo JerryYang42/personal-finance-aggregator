@@ -1,13 +1,9 @@
 import axios from 'axios';
 import { Currency } from '../models/Currency.js';
+import type { HttpBasicAuthCredentials } from '../models/HttpBasicAuthCredentials.js';
 
 export interface IBankProvider {
   getBalance(): Promise<{ balance: number; currency: string }>;
-}
-
-export interface HttpBasicAuthCredentials {
-  apiKey: string;
-  apiSecret: string;
 }
 
 export class Trading212Provider implements IBankProvider {
