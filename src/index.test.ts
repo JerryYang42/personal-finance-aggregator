@@ -1,5 +1,19 @@
 import request from 'supertest';
 import { app } from './index.js';
+import { jest } from '@jest/globals';
+import type { AxiosResponse } from 'axios';
+
+// Mock the Trading212Provider BEFORE importing the app
+const mockGetBalance = jest.fn<() => Promise<AxiosResponse>>();
+
+jest.unstable_mockModule('./providers/Trading212Provider.js', () => ({
+  Trading212Provider: jest.fn().mockImplementation(() => ({
+    getBalance: mockGetBalance
+  }))
+}));
+
+// Mock the Trading212Provider
+jest.mock('./providers/Trading212Provider.js');
 
 describe('Integration Tests', () => {
   describe('GET /balance', () => {
