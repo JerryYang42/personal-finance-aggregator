@@ -1,0 +1,14 @@
+# docker-compose.override.yml
+# Copy this to docker-compose.override.yml for non-corporate environments
+# Docker Compose automatically merges this with docker-compose.yml
+
+services:
+  app:
+    build:
+      args:
+        # Disable SSL workarounds for clean environments
+        DISABLE_SSL_CHECK: "false"
+    environment:
+      # Don't set NODE_EXTRA_CA_CERTS in clean environments
+      - NODE_EXTRA_CA_CERTS=
+    volumes: []  # Remove certificate mount
