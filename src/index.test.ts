@@ -1,10 +1,9 @@
 import request from 'supertest';
-import { app } from './index.js';
 import { jest } from '@jest/globals';
-import type { AxiosResponse } from 'axios';
+import type { Express } from 'express';
 
 // Mock the Trading212Provider BEFORE importing the app
-const mockGetBalance = jest.fn<() => Promise<AxiosResponse>>();
+const mockGetBalance = jest.fn<() => Promise<{ balance: number; currency: string }>>();
 
 jest.unstable_mockModule('./providers/Trading212Provider.js', () => ({
   Trading212Provider: jest.fn().mockImplementation(() => ({
@@ -12,33 +11,63 @@ jest.unstable_mockModule('./providers/Trading212Provider.js', () => ({
   }))
 }));
 
-// Mock the Trading212Provider
-jest.mock('./providers/Trading212Provider.js');
-
 describe('Integration Tests', () => {
+  let app: Express;
+
+  beforeAll(async () => {
+    // Dynamically import the app AFTER mocks are set up
+    const indexModule = await import('./index.js');
+    app = indexModule.app;
+  });
+
+  beforeEach(() => {
+    // Reset mock before each test
+    mockGetBalance.mockReset();
+  });
+
   describe('GET /balance', () => {
     it('should return balance from Trading212', async () => {
+      // Configure mock to return test data
+      mockGetBalance.mockResolvedValue({
+        balance: 1234.56,
+        currency: 'GBP'
+      });
+
       const response = await request(app)
         .get('/balance')
         .expect('Content-Type', /json/)
         .expect(200);
 
-      expect(response.body).toHaveProperty('source', 'Trading212 Stocks ISA');
-      expect(response.body).toHaveProperty('balance');
-      expect(response.body).toHaveProperty('currency');
-      expect(typeof response.body.balance).toBe('number');
-      expect(typeof response.body.currency).toBe('string');
+      expect(response.body).toEqual({
+        source: 'Trading212 Stocks ISA',
+        balance: 1234.56,
+        currency: 'GBP'
+      });
+      expect(mockGetBalance).toHaveBeenCalledTimes(1);
     });
 
     it('should handle errors gracefully', async () => {
-      // This test assumes the API might fail
-      const response = await request(app).get('/balance');
-      
-      if (response.status === 500) {
-        expect(response.body).toHaveProperty('error');
-      } else {
-        expect(response.status).toBe(200);
-      }
+      // Configure mock to throw an error
+      mockGetBalance.mockRejectedValue(new Error('API Error'));
+
+      const response = await request(app)
+        .get('/balance')
+        .expect('Content-Type', /json/)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
+      expect(mockGetBalance).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('GET /health', () => {
+    it('should return health status', async () => {
+      const response = await request(app)
+        .get('/health')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(response.body).toEqual({ status: 'ok' });
     });
   });
 });
