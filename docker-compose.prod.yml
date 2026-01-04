@@ -9,8 +9,11 @@
 #   export TRADING212_STOCKS_ISA_API_KEY=your_key
 #   export TRADING212_STOCKS_ISA_SECRET_KEY=your_secret
 #   docker compose -f docker-compose.prod.yml up -d
+<<<<<<< HEAD
 #   # to use override
 #   docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d
+=======
+>>>>>>> dockerise
 
 services:
   app:
