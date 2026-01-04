@@ -67,8 +67,18 @@ web_modules/
 
 # dotenv environment variable files
 .env
-.env.*
+.env.local
+.env.*.local
+!.env.template
 !.env.example
+
+# Docker Compose overrides (environment-specific)
+docker-compose.override.yml
+
+# SSL certificates (should never be committed)
+*.crt
+*.pem
+*.key
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

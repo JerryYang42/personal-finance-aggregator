@@ -1,12 +1,16 @@
-version: '3.8'
-
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        # Set to true when behind corporate proxy (Zscaler, etc.)
+        DISABLE_SSL_CHECK: "true"
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      # If custom CA cert is mounted, tell Node.js to use it
+      - NODE_EXTRA_CA_CERTS=/etc/ssl/certs/custom-ca.crt
     # Option 1: Use .env file (recommended for local/dev)
     env_file:
       - .env
@@ -19,4 +23,7 @@ services:
     # Remove volumes in production - only for development hot reload
     # volumes:
     #   - ./src:/app/src
+    # Mount Zscaler certificate at runtime (only when needed)
+    volumes:
+      - ${SSL_CERT_FILE}:/etc/ssl/certs/custom-ca.crt:ro
     restart: unless-stopped
