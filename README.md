@@ -73,6 +73,9 @@ npm install --save-dev jest @types/jest ts-jest
 
 # install tsx
 npm install --save-dev tsx
+
+# install eslint
+npm install --save-dev @eslint/js typescript-eslint
 ```
 
 ```zsh

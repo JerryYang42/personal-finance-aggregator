@@ -8,16 +8,10 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const nodeEnv = process.env.NODE_ENV || 'development';
-const isDevelopment = nodeEnv === 'development';
 const isTesting = nodeEnv === 'test';
 const isProduction = nodeEnv === 'production';
 // Logging verbosity
 const logLevel = isProduction ? 'error' : 'debug';
-// Error details
-const showStackTrace = isDevelopment;
-// Performance optimizations
-const enableCaching = isProduction;
-
 
 // Injection: In production, we use real credentials
 const t212StocksISA = new Trading212Provider(

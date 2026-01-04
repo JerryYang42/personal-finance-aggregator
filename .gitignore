@@ -149,3 +149,6 @@ dist/
 
 # MacOS
 .DS_Store
+
+# Include lint
+eslint.config.js
