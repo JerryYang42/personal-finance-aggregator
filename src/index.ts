@@ -2,8 +2,14 @@ import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
 import { Trading212Provider } from './providers/Trading212Provider.js';
+import { validateEnv } from './config/validateEnv.js';
 
 dotenv.config();
+
+// Validate environment variables (skip in test mode)
+if (process.env.NODE_ENV !== 'test') {
+  validateEnv();
+}
 
 const app = express();
 const port = process.env.PORT || 3000;

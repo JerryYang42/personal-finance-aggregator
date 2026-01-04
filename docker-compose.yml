@@ -7,8 +7,16 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+    # Option 1: Use .env file (recommended for local/dev)
     env_file:
       - .env
-    volumes:
-      - ./src:/app/src
-    restart: unless-stopped # or always
+    # Option 2: Set environment variables directly (recommended for production)
+    # environment:
+    #   - NODE_ENV=production
+    #   - PORT=3000
+    #   - TRADING212_STOCKS_ISA_API_KEY=${TRADING212_STOCKS_ISA_API_KEY}
+    #   - TRADING212_STOCKS_ISA_SECRET_KEY=${TRADING212_STOCKS_ISA_SECRET_KEY}
+    # Remove volumes in production - only for development hot reload
+    # volumes:
+    #   - ./src:/app/src
+    restart: unless-stopped
