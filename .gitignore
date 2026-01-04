@@ -151,4 +151,4 @@ dist/
 .DS_Store
 
 # Include lint
-eslint.config.js
+!eslint.config.js
