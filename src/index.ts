@@ -21,6 +21,10 @@ const t212StocksISA = new Trading212Provider(
   }
 );
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.get('/balance', async (req, res) => {
   try {
     const balance = await t212StocksISA.getBalance();
