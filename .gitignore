@@ -162,3 +162,6 @@ dist/
 
 # Include lint
 !eslint.config.js
+
+# private notes for developers
+dev-notes.md
