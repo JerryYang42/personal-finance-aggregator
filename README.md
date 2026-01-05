@@ -152,13 +152,13 @@ curl http://localhost:3000/balances
     {
       "accountId": "trading212-stocks-isa",
       "accountName": "Trading212 Stocks ISA",
-      "balance": 5188.89,
+      "balance": 1234567.89,
       "currency": "GBP"
     },
     {
       "accountId": "trading212-investment-account",
       "accountName": "Trading212 Investment Account",
-      "balance": 116.86,
+      "balance": 9876543.21,
       "currency": "GBP"
     }
   ]
