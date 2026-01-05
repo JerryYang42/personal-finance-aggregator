@@ -4,12 +4,11 @@ import type { Express } from 'express';
 
 // Mock the Trading212Provider BEFORE importing the app
 const mockGetBalance = jest.fn<() => Promise<{ balance: number; currency: string }>>();
-const mockGetName = jest.fn<() => string>();
 
 jest.unstable_mockModule('./providers/Trading212Provider.js', () => ({
-  Trading212Provider: jest.fn().mockImplementation(() => ({
+  Trading212Provider: jest.fn().mockImplementation((credentials: any, name: string) => ({
     getBalance: mockGetBalance,
-    getName: mockGetName
+    getName: jest.fn(() => name)
   }))
 }));
 
@@ -25,10 +24,6 @@ describe('Integration Tests', () => {
   beforeEach(() => {
     // Reset mocks before each test
     mockGetBalance.mockReset();
-    mockGetName.mockReset();
-    
-    // Set default mock return values
-    mockGetName.mockReturnValue('Trading212 Stocks ISA');
   });
 
   describe('GET /accounts', () => {
@@ -43,6 +38,11 @@ describe('Integration Tests', () => {
           {
             id: 'trading212-stocks-isa',
             name: 'Trading212 Stocks ISA',
+            type: 'investment'
+          },
+          {
+            id: 'trading212-investment-account',
+            name: 'Trading212 Investment Account',
             type: 'investment'
           }
         ]
@@ -98,11 +98,16 @@ describe('Integration Tests', () => {
 
   describe('GET /balances', () => {
     it('should return all account balances', async () => {
-      // Configure mock to return test data
-      mockGetBalance.mockResolvedValue({
-        balance: 5170.91,
-        currency: 'GBP'
-      });
+      // Configure mock to return different test data for each call
+      mockGetBalance
+        .mockResolvedValueOnce({
+          balance: 5170.91,
+          currency: 'GBP'
+        })
+        .mockResolvedValueOnce({
+          balance: 3250.45,
+          currency: 'GBP'
+        });
 
       const response = await request(app)
         .get('/balances')
@@ -116,10 +121,16 @@ describe('Integration Tests', () => {
             accountName: 'Trading212 Stocks ISA',
             balance: 5170.91,
             currency: 'GBP'
+          },
+          {
+            accountId: 'trading212-investment-account',
+            accountName: 'Trading212 Investment Account',
+            balance: 3250.45,
+            currency: 'GBP'
           }
         ]
       });
-      expect(mockGetBalance).toHaveBeenCalledTimes(1);
+      expect(mockGetBalance).toHaveBeenCalledTimes(2);
     });
 
     it('should handle errors gracefully', async () => {
@@ -132,7 +143,7 @@ describe('Integration Tests', () => {
         .expect(500);
 
       expect(response.body).toHaveProperty('error');
-      expect(mockGetBalance).toHaveBeenCalledTimes(1);
+      expect(mockGetBalance).toHaveBeenCalledTimes(2);
     });
   });
 

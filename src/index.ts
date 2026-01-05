@@ -1,9 +1,9 @@
 import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
-import { Trading212Provider } from './providers/Trading212Provider.js';
 import { AccountService } from './services/AccountService.js';
 import { validateEnv } from './config/validateEnv.js';
+import { PROVIDER_CONFIGS } from './config/providers.js';
 
 dotenv.config();
 
@@ -24,17 +24,9 @@ const logLevel = isProduction ? 'error' : 'debug';
 const accountService = new AccountService();
 
 // Register providers
-accountService.registerProvider(
-  'trading212-stocks-isa',
-  new Trading212Provider(
-    { 
-      apiKey: process.env.TRADING212_STOCKS_ISA_API_KEY || '', 
-      apiSecret: process.env.TRADING212_STOCKS_ISA_SECRET_KEY || '' 
-    },
-    'Trading212 Stocks ISA'
-  ),
-  'investment'
-);
+PROVIDER_CONFIGS.forEach(config => {
+  accountService.registerProvider(config.id, config.provider, config.accountType);
+});
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });

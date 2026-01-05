@@ -42,6 +42,11 @@ describe('Integration Tests with External API Mocking', () => {
             id: 'trading212-stocks-isa',
             name: 'Trading212 Stocks ISA',
             type: 'investment'
+          },
+          {
+            id: 'trading212-investment-account',
+            name: 'Trading212 Investment Account',
+            type: 'investment'
           }
         ]
       });
@@ -177,12 +182,17 @@ describe('Integration Tests with External API Mocking', () => {
 
   describe('GET /balances', () => {
     it('should return all account balances', async () => {
-      // Mock the external Trading212 API endpoint
+      // Mock the external Trading212 API endpoints for both accounts
       nock('https://live.trading212.com')
         .get('/api/v0/equity/account/cash')
         .matchHeader('Authorization', /^Basic /)
         .reply(200, {
           total: 5170.91
+        })
+        .get('/api/v0/equity/account/cash')
+        .matchHeader('Authorization', /^Basic /)
+        .reply(200, {
+          total: 3250.45
         });
 
       const response = await request(app)
@@ -197,14 +207,22 @@ describe('Integration Tests with External API Mocking', () => {
             accountName: 'Trading212 Stocks ISA',
             balance: 5170.91,
             currency: 'GBP'
+          },
+          {
+            accountId: 'trading212-investment-account',
+            accountName: 'Trading212 Investment Account',
+            balance: 3250.45,
+            currency: 'GBP'
           }
         ]
       });
     });
 
     it('should handle errors gracefully', async () => {
-      // Mock a network failure
+      // Mock network failures for both accounts
       nock('https://live.trading212.com')
+        .get('/api/v0/equity/account/cash')
+        .replyWithError('Network connection failed')
         .get('/api/v0/equity/account/cash')
         .replyWithError('Network connection failed');
 
