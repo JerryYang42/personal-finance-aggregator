@@ -6,14 +6,18 @@
 interface RequiredEnvVars {
   TRADING212_STOCKS_ISA_API_KEY: string;
   TRADING212_STOCKS_ISA_SECRET_KEY: string;
+  TRADING212_INVESTMENT_ACCOUNT_API_KEY: string;
+  TRADING212_INVESTMENT_ACCOUNT_SECRET_KEY: string;
   PORT?: string;
   NODE_ENV?: string;
 }
 
 export function validateEnv(): void {
-  const required = [
+  const required: (keyof RequiredEnvVars)[] = [
     'TRADING212_STOCKS_ISA_API_KEY',
-    'TRADING212_STOCKS_ISA_SECRET_KEY'
+    'TRADING212_STOCKS_ISA_SECRET_KEY',
+    'TRADING212_INVESTMENT_ACCOUNT_API_KEY',
+    'TRADING212_INVESTMENT_ACCOUNT_SECRET_KEY'
   ];
 
   const missing: string[] = [];
