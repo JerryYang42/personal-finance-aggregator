@@ -1,15 +1,23 @@
 import axios from 'axios';
 import { Currency } from '../models/Currency.js';
 import type { HttpBasicAuthCredentials } from '../models/HttpBasicAuthCredentials.js';
+import type { Provider } from './Provider.js';
 
 export interface IBankProvider {
   getBalance(): Promise<{ balance: number; currency: string }>;
 }
 
-export class Trading212Provider implements IBankProvider {
+export class Trading212Provider implements Provider, IBankProvider {
   private readonly baseUrl = 'https://live.trading212.com/api/v0/equity/account/cash';
   
-  constructor(private credentials: HttpBasicAuthCredentials) {}
+  constructor(
+    private credentials: HttpBasicAuthCredentials,
+    private accountName: string = 'Trading212'
+  ) {}
+
+  getName(): string {
+    return this.accountName;
+  }
 
   async getBalance() {
     // Trading 212 uses Basic Auth: base64(key:secret)

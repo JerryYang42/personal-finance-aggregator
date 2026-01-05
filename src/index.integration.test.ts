@@ -29,7 +29,31 @@ describe('Integration Tests with External API Mocking', () => {
     nock.restore();
   });
 
-  describe('GET /balance', () => {
+  describe('GET /accounts', () => {
+    it('should return list of accounts', async () => {
+      const response = await request(app)
+        .get('/accounts')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(response.body).toEqual({
+        accounts: [
+          {
+            id: 'trading212-stocks-isa',
+            name: 'Trading212 Stocks ISA',
+            type: 'investment'
+          },
+          {
+            id: 'trading212-investment-account',
+            name: 'Trading212 Investment Account',
+            type: 'investment'
+          }
+        ]
+      });
+    });
+  });
+
+  describe('GET /accounts/:accountId/balance', () => {
     it('should return balance from Trading212 API', async () => {
       // Mock the external Trading212 API endpoint
       nock('https://live.trading212.com')
@@ -40,15 +64,26 @@ describe('Integration Tests with External API Mocking', () => {
         });
 
       const response = await request(app)
-        .get('/balance')
+        .get('/accounts/trading212-stocks-isa/balance')
         .expect('Content-Type', /json/)
         .expect(200);
 
       expect(response.body).toEqual({
-        source: 'Trading212 Stocks ISA',
+        accountId: 'trading212-stocks-isa',
+        accountName: 'Trading212 Stocks ISA',
         balance: 1234.56,
         currency: 'GBP'
       });
+    });
+
+    it('should return 404 for non-existent account', async () => {
+      const response = await request(app)
+        .get('/accounts/non-existent-account/balance')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.error).toContain('not found');
     });
 
     it('should handle API errors gracefully', async () => {
@@ -61,7 +96,7 @@ describe('Integration Tests with External API Mocking', () => {
         });
 
       const response = await request(app)
-        .get('/balance')
+        .get('/accounts/trading212-stocks-isa/balance')
         .expect('Content-Type', /json/)
         .expect(500);
 
@@ -75,7 +110,7 @@ describe('Integration Tests with External API Mocking', () => {
         .replyWithError('Network connection failed');
 
       const response = await request(app)
-        .get('/balance')
+        .get('/accounts/trading212-stocks-isa/balance')
         .expect('Content-Type', /json/)
         .expect(500);
 
@@ -92,7 +127,7 @@ describe('Integration Tests with External API Mocking', () => {
         });
 
       const response = await request(app)
-        .get('/balance')
+        .get('/accounts/trading212-stocks-isa/balance')
         .expect('Content-Type', /json/)
         .expect(500);
 
@@ -112,7 +147,7 @@ describe('Integration Tests with External API Mocking', () => {
         .reply(200, { total: 100.00 });
 
       await request(app)
-        .get('/balance')
+        .get('/accounts/trading212-stocks-isa/balance')
         .expect(200);
 
       expect(authHeader).toMatch(/^Basic /);
@@ -134,7 +169,7 @@ describe('Integration Tests with External API Mocking', () => {
           .reply(200, { total: testCase.total });
 
         const response = await request(app)
-          .get('/balance')
+          .get('/accounts/trading212-stocks-isa/balance')
           .expect(200);
 
         expect(response.body.balance).toBe(testCase.expected);
@@ -142,6 +177,61 @@ describe('Integration Tests with External API Mocking', () => {
         // Clean for next iteration
         nock.cleanAll();
       }
+    });
+  });
+
+  describe('GET /balances', () => {
+    it('should return all account balances', async () => {
+      // Mock the external Trading212 API endpoints for both accounts
+      nock('https://live.trading212.com')
+        .get('/api/v0/equity/account/cash')
+        .matchHeader('Authorization', /^Basic /)
+        .reply(200, {
+          total: 5170.91
+        })
+        .get('/api/v0/equity/account/cash')
+        .matchHeader('Authorization', /^Basic /)
+        .reply(200, {
+          total: 3250.45
+        });
+
+      const response = await request(app)
+        .get('/balances')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(response.body).toEqual({
+        balances: [
+          {
+            accountId: 'trading212-stocks-isa',
+            accountName: 'Trading212 Stocks ISA',
+            balance: 5170.91,
+            currency: 'GBP'
+          },
+          {
+            accountId: 'trading212-investment-account',
+            accountName: 'Trading212 Investment Account',
+            balance: 3250.45,
+            currency: 'GBP'
+          }
+        ]
+      });
+    });
+
+    it('should handle errors gracefully', async () => {
+      // Mock network failures for both accounts
+      nock('https://live.trading212.com')
+        .get('/api/v0/equity/account/cash')
+        .replyWithError('Network connection failed')
+        .get('/api/v0/equity/account/cash')
+        .replyWithError('Network connection failed');
+
+      const response = await request(app)
+        .get('/balances')
+        .expect('Content-Type', /json/)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('error');
     });
   });
 
