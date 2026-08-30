@@ -5,7 +5,8 @@ import { AccountService } from './services/AccountService.js';
 import { validateEnv } from './config/validateEnv.js';
 import { PROVIDER_CONFIGS } from './config/providers.js';
 
-dotenv.config();
+// .env values should always win over stale vars already exported in the shell
+dotenv.config({ override: true });
 
 // Validate environment variables (skip in test mode)
 if (process.env.NODE_ENV !== 'test') {

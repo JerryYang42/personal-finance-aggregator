@@ -8,7 +8,7 @@ export interface IBankProvider {
 }
 
 export class Trading212Provider implements Provider, IBankProvider {
-  private readonly baseUrl = 'https://live.trading212.com/api/v0/equity/account/cash';
+  private readonly baseUrl = 'https://live.trading212.com/api/v0/equity/account/summary';
   
   constructor(
     private credentials: HttpBasicAuthCredentials,
@@ -28,7 +28,7 @@ export class Trading212Provider implements Provider, IBankProvider {
     });
 
     return {
-      balance: response.data.total,
+      balance: response.data.totalValue,
       currency: Currency.GBP
     };
   }
