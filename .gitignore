@@ -165,3 +165,6 @@ dist/
 
 # private notes for developers
 dev-notes.md
+
+# codegraph
+.codegraph/
