@@ -3,9 +3,10 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { AccountService } from './services/AccountService.js';
 import { validateEnv } from './config/validateEnv.js';
-import { PROVIDER_CONFIGS } from './config/providers.js';
+import { getProviderConfigs } from './config/providers.js';
 
-dotenv.config();
+// .env values should always win over stale vars already exported in the shell
+dotenv.config({ override: true });
 
 // Validate environment variables (skip in test mode)
 if (process.env.NODE_ENV !== 'test') {
@@ -24,7 +25,7 @@ const logLevel = isProduction ? 'error' : 'debug';
 const accountService = new AccountService();
 
 // Register providers
-PROVIDER_CONFIGS.forEach(config => {
+getProviderConfigs().forEach(config => {
   accountService.registerProvider(config.id, config.provider, config.accountType);
 });
 

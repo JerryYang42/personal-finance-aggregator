@@ -57,10 +57,10 @@ describe('Integration Tests with External API Mocking', () => {
     it('should return balance from Trading212 API', async () => {
       // Mock the external Trading212 API endpoint
       nock('https://live.trading212.com')
-        .get('/api/v0/equity/account/cash')
+        .get('/api/v0/equity/account/summary')
         .matchHeader('Authorization', /^Basic /)
         .reply(200, {
-          total: 1234.56
+          totalValue: 1234.56
         });
 
       const response = await request(app)
@@ -89,7 +89,7 @@ describe('Integration Tests with External API Mocking', () => {
     it('should handle API errors gracefully', async () => {
       // Mock a 500 error from Trading212 API
       nock('https://live.trading212.com')
-        .get('/api/v0/equity/account/cash')
+        .get('/api/v0/equity/account/summary')
         .matchHeader('Authorization', /^Basic /)
         .reply(500, {
           message: 'Internal Server Error'
@@ -106,7 +106,7 @@ describe('Integration Tests with External API Mocking', () => {
     it('should handle network errors', async () => {
       // Mock a network failure
       nock('https://live.trading212.com')
-        .get('/api/v0/equity/account/cash')
+        .get('/api/v0/equity/account/summary')
         .replyWithError('Network connection failed');
 
       const response = await request(app)
@@ -120,7 +120,7 @@ describe('Integration Tests with External API Mocking', () => {
     it('should handle unauthorized errors', async () => {
       // Mock a 401 Unauthorized response
       nock('https://live.trading212.com')
-        .get('/api/v0/equity/account/cash')
+        .get('/api/v0/equity/account/summary')
         .matchHeader('Authorization', /^Basic /)
         .reply(401, {
           message: 'Invalid API credentials'
@@ -139,12 +139,12 @@ describe('Integration Tests with External API Mocking', () => {
 
       // Capture the Authorization header
       nock('https://live.trading212.com')
-        .get('/api/v0/equity/account/cash')
+        .get('/api/v0/equity/account/summary')
         .matchHeader('Authorization', (value) => {
           authHeader = value;
           return /^Basic /.test(value);
         })
-        .reply(200, { total: 100.00 });
+        .reply(200, { totalValue: 100.00 });
 
       await request(app)
         .get('/accounts/trading212-stocks-isa/balance')
@@ -158,15 +158,15 @@ describe('Integration Tests with External API Mocking', () => {
 
     it('should handle different balance values correctly', async () => {
       const testCases = [
-        { total: 0, expected: 0 },
-        { total: 999999.99, expected: 999999.99 },
-        { total: 0.01, expected: 0.01 },
+        { totalValue: 0, expected: 0 },
+        { totalValue: 999999.99, expected: 999999.99 },
+        { totalValue: 0.01, expected: 0.01 },
       ];
 
       for (const testCase of testCases) {
         nock('https://live.trading212.com')
-          .get('/api/v0/equity/account/cash')
-          .reply(200, { total: testCase.total });
+          .get('/api/v0/equity/account/summary')
+          .reply(200, { totalValue: testCase.totalValue });
 
         const response = await request(app)
           .get('/accounts/trading212-stocks-isa/balance')
@@ -184,15 +184,15 @@ describe('Integration Tests with External API Mocking', () => {
     it('should return all account balances', async () => {
       // Mock the external Trading212 API endpoints for both accounts
       nock('https://live.trading212.com')
-        .get('/api/v0/equity/account/cash')
+        .get('/api/v0/equity/account/summary')
         .matchHeader('Authorization', /^Basic /)
         .reply(200, {
-          total: 5170.91
+          totalValue: 5170.91
         })
-        .get('/api/v0/equity/account/cash')
+        .get('/api/v0/equity/account/summary')
         .matchHeader('Authorization', /^Basic /)
         .reply(200, {
-          total: 3250.45
+          totalValue: 3250.45
         });
 
       const response = await request(app)
@@ -221,9 +221,9 @@ describe('Integration Tests with External API Mocking', () => {
     it('should handle errors gracefully', async () => {
       // Mock network failures for both accounts
       nock('https://live.trading212.com')
-        .get('/api/v0/equity/account/cash')
+        .get('/api/v0/equity/account/summary')
         .replyWithError('Network connection failed')
-        .get('/api/v0/equity/account/cash')
+        .get('/api/v0/equity/account/summary')
         .replyWithError('Network connection failed');
 
       const response = await request(app)

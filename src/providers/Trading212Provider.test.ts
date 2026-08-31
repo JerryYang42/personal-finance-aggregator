@@ -23,7 +23,7 @@ describe('Trading212Provider', () => {
     const provider = new Trading212Provider({ apiKey: 'key', apiSecret: 'secret' });
     
     mockGet.mockResolvedValue({ 
-      data: { total: 100 },
+      data: { totalValue: 100 },
       status: 200,
       statusText: 'OK',
       headers: {},
