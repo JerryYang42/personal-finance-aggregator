@@ -11,7 +11,7 @@ export default [
   prettierConfig,
   {
     files: ['**/*.ts'],
-    ignores: ['**/*.test.ts', '**/*.spec.ts'],
+    ignores: ['**/*.test.ts', '**/*.spec.ts', 'scripts/**/*.ts'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
@@ -26,7 +26,7 @@ export default [
     },
   },
   {
-    files: ['**/*.test.ts', '**/*.spec.ts'],
+    files: ['**/*.test.ts', '**/*.spec.ts', 'scripts/**/*.ts'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
